@@ -1,0 +1,90 @@
+NAME
+    `Device::BusPirate::Chip::MAX7219' - use a MAX7219 chip with
+    `Device::BusPirate'
+
+SYNOPSIS
+     use Device::BusPirate;
+
+     my $pirate = Device::BusPirate->new;
+     my $max = $pirate->mount_chip( "MAX7219" )->get;
+
+     $max->mode->configure( open_drain => 0 )->get;
+     $max->power(1)->get;
+
+     $max->intensity( 2 )->get;
+     $max->limit( 8 )->get;
+
+     $max->displaytest( 1 )->get;
+     $max->shutdown( 0 )->get;
+
+     sleep 3;
+
+     $max->displaytest( 0 )->get;
+
+DESCRIPTION
+    This Device::BusPirate::Chip subclass provides specific communication to
+    a Maxim Integrated MAX7219 chip attached to the Bus Pirate via SPI. As
+    the MAX7221 chip operates virtually identically, this chip will work
+    too.
+
+    The reader is presumed to be familiar with the general operation of this
+    chip; the documentation here will not attempt to explain or define
+    chip-specific concepts or features, only the use of this module to
+    access them.
+
+METHODS
+  $max->write_bcd( $digit, $val )->get
+    Writes the value at the given digit, setting it to BCD mode if not
+    already so. `$val' should be a single digit number or string, or one of
+    the special recognised characters in BCD mode of `-', `E', `H', `L', `P'
+    or space. The value may optionally be followed by a decimal point `.',
+    which will be set on the display.
+
+    Switches the digit into BCD mode if not already so.
+
+  $max->write_raw( $digit, $bits )->get
+    Writes the value at the given digit, setting the raw column lines to the
+    8-bit value given.
+
+    Switches the digit into undecoded raw mode if not already so.
+
+  $max->write_hex( $digit, $val )->get
+    Similar to `write_bcd', but uses a segment decoder written in code
+    rather than on the chip itself, to turn values into sets of segments to
+    display. This makes it capable of displaying the letters `A' to `F', in
+    addition to numbers, `-' and space.
+
+  $max->set_decode( $bits )->get
+    Directly sets the decode mode of all the digits at once. This is more
+    efficient for initialising digits into BCD or raw mode, than individual
+    calls to `write_bcd' or `write_raw' for each digit individually.
+
+  $max->intensity( $value )->get
+    Sets the intensity register. `$value' must be between 0 and 15, with
+    higher values giving a more intense output.
+
+  $max->limit( $columns )->get
+    Sets the scan limit register. `$value' must be between 1 and 8, to set
+    between 1 and 8 digits. This should only be used to adjust for the
+    number of LED digits or columns units physically attached to the chip;
+    not for normal display blanking, as it affects the overall intensity.
+
+    *Note* that this is not directly the value written to the `LIMIT'
+    register.
+
+  $max->shutdown( $off )->get
+    Sets the shutdown register, entirely blanking the display and turning
+    off all output if set to a true value, or restoring the display to its
+    previous content if set false.
+
+    *Note* that this is not directly the value written to the `SHUTDOWN'
+    register.
+
+  $max->displaytest( $on )->get
+    Sets the display test register, overriding the output control and
+    turning on every LED if set to a true value, or restoring normal
+    operation if set to false.
+
+AUTHOR
+    Paul Evans <leonerd@leonerd.org.uk>
+
